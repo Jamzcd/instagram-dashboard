@@ -3,7 +3,7 @@ import {
   Users, Heart, Eye, BarChart3, Clock, Bookmark, Instagram, TrendingUp,
   Upload, Sun, Moon, Download, FileText, X, CheckCircle, Share2, MessageCircle,
   Star, Activity, Zap, MapPin, Layers, Camera, Video, Image, Monitor,
-  HelpCircle, Send, Mail, Phone
+  HelpCircle, Send, Mail, Phone, Edit3, Save
 } from "lucide-react";
 import {
   ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis
@@ -15,31 +15,87 @@ const HubstackDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState(30);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+
+  // Estados para dados editáveis
+  const [profileData, setProfileData] = useState({
+    username: '@cliente_exemplo',
+    followers: '125.4K'
+  });
+
+  const [mainMetrics, setMainMetrics] = useState({
+    likes: '18.2K',
+    likesChange: '+12.5%',
+    comments: '2.4K',
+    commentsChange: '+8.3%',
+    reach: '125K',
+    reachChange: '+15.7%',
+    engagement: '4.2%',
+    engagementChange: '+0.8%'
+  });
+
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    profileVisits: '3.2K',
+    profileVisitsChange: '+18%',
+    averageTime: '2m 45s',
+    averageTimeChange: '+15s',
+    saves: '1.2K',
+    savesChange: '+125',
+    externalLinks: '456',
+    externalLinksChange: '+89'
+  });
+
+  const [chartData, setChartData] = useState({
+    weekly: [
+      { day: 'S', reach: 12400 },
+      { day: 'T', reach: 15600 },
+      { day: 'Q', reach: 18200 },
+      { day: 'Q', reach: 16800 },
+      { day: 'S', reach: 21500 },
+      { day: 'S', reach: 25300 },
+      { day: 'D', reach: 23100 }
+    ],
+    ageData: [
+      { name: '18-24', value: 35, color: '#3B82F6' },
+      { name: '25-34', value: 28, color: '#1E40AF' },
+      { name: '35-44', value: 22, color: '#60A5FA' },
+      { name: '45+', value: 15, color: '#1D4ED8' }
+    ]
+  });
+
+  const [growthData, setGrowthData] = useState({
+    periodGrowth: '+12.5%',
+    newFollowers: '+2.3K'
+  });
+
+  const [insightsData, setInsightsData] = useState({
+    bestFormat: '3:4',
+    topHashtag: '#lifestyle',
+    targetAudience: '25-34 anos'
+  });
+
+  const [locationData, setLocationData] = useState([
+    { city: 'São Paulo, BR', percentage: 85 },
+    { city: 'Rio de Janeiro, BR', percentage: 65 },
+    { city: 'Belo Horizonte, BR', percentage: 45 }
+  ]);
+
+  const [contentData, setContentData] = useState([
+    { type: 'Posts', count: 45 },
+    { type: 'Stories', count: 128 },
+    { type: 'Reels', count: 23 },
+    { type: 'Videos', count: 12 }
+  ]);
+
+  // Estados temporários para edição
+  const [tempData, setTempData] = useState({});
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Dados de exemplo
-  const weeklyData = [
-    { day: 'S', reach: selectedPeriod === 7 ? 4000 : selectedPeriod === 30 ? 12400 : 35000 },
-    { day: 'T', reach: selectedPeriod === 7 ? 5000 : selectedPeriod === 30 ? 15600 : 44000 },
-    { day: 'Q', reach: selectedPeriod === 7 ? 6000 : selectedPeriod === 30 ? 18200 : 51000 },
-    { day: 'Q', reach: selectedPeriod === 7 ? 5500 : selectedPeriod === 30 ? 16800 : 47000 },
-    { day: 'S', reach: selectedPeriod === 7 ? 7000 : selectedPeriod === 30 ? 21500 : 60000 },
-    { day: 'S', reach: selectedPeriod === 7 ? 8500 : selectedPeriod === 30 ? 25300 : 71000 },
-    { day: 'D', reach: selectedPeriod === 7 ? 7800 : selectedPeriod === 30 ? 23100 : 65000 }
-  ];
-
-  const ageData = [
-    { name: '18-24', value: 35, color: '#3B82F6' },
-    { name: '25-34', value: 28, color: '#1E40AF' },
-    { name: '35-44', value: 22, color: '#60A5FA' },
-    { name: '45+', value: 15, color: '#1D4ED8' }
-  ];
 
   const showToast = (message, type = 'success') => {
     const existing = document.getElementById('toast');
@@ -67,14 +123,44 @@ const HubstackDashboard = () => {
     }
   };
 
+  const openManualDataModal = () => {
+    setTempData({
+      profileData: { ...profileData },
+      mainMetrics: { ...mainMetrics },
+      performanceMetrics: { ...performanceMetrics },
+      growthData: { ...growthData },
+      insightsData: { ...insightsData },
+      locationData: [...locationData],
+      contentData: [...contentData],
+      chartData: {
+        weekly: [...chartData.weekly],
+        ageData: [...chartData.ageData]
+      }
+    });
+    setShowManualModal(true);
+  };
+
+  const saveManualData = () => {
+    setProfileData(tempData.profileData);
+    setMainMetrics(tempData.mainMetrics);
+    setPerformanceMetrics(tempData.performanceMetrics);
+    setGrowthData(tempData.growthData);
+    setInsightsData(tempData.insightsData);
+    setLocationData(tempData.locationData);
+    setContentData(tempData.contentData);
+    setChartData(tempData.chartData);
+    setShowManualModal(false);
+    showToast('Dados atualizados com sucesso!');
+  };
+
   const shareViaWhatsApp = () => {
     const text = `📊 Relatório Instagram Analytics
     
 📈 Período: ${selectedPeriod} dias
-❤️ Curtidas: 18.2K
-💬 Comentários: 2.4K  
-👁️ Alcance: 125K
-📱 Engajamento: 4.2%
+❤️ Curtidas: ${mainMetrics.likes}
+💬 Comentários: ${mainMetrics.comments}
+👁️ Alcance: ${mainMetrics.reach}
+📱 Engajamento: ${mainMetrics.engagement}
 
 Relatório Hubstack®`;
     
@@ -87,10 +173,10 @@ Relatório Hubstack®`;
     const body = `Relatório de performance dos últimos ${selectedPeriod} dias.
 
 Métricas principais:
-• Curtidas: 18.2K
-• Comentários: 2.4K
-• Alcance: 125K
-• Engajamento: 4.2%
+• Curtidas: ${mainMetrics.likes}
+• Comentários: ${mainMetrics.comments}
+• Alcance: ${mainMetrics.reach}
+• Engajamento: ${mainMetrics.engagement}
 
 Gerado por Hubstack®`;
     
@@ -123,19 +209,19 @@ Gerado por Hubstack®`;
             <div class="metrics">
               <div class="metric">
                 <div class="metric-title">CURTIDAS</div>
-                <div class="metric-value">18.2K</div>
+                <div class="metric-value">${mainMetrics.likes}</div>
               </div>
               <div class="metric">
                 <div class="metric-title">COMENTÁRIOS</div>
-                <div class="metric-value">2.4K</div>
+                <div class="metric-value">${mainMetrics.comments}</div>
               </div>
               <div class="metric">
                 <div class="metric-title">ALCANCE</div>
-                <div class="metric-value">125K</div>
+                <div class="metric-value">${mainMetrics.reach}</div>
               </div>
               <div class="metric">
                 <div class="metric-title">ENGAJAMENTO</div>
-                <div class="metric-value">4.2%</div>
+                <div class="metric-value">${mainMetrics.engagement}</div>
               </div>
             </div>
             <p style="text-align: center; margin-top: 50px; color: #666;">
@@ -167,8 +253,8 @@ Gerado por Hubstack®`;
               <div className="flex items-center gap-3 ml-4">
                 <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
                 <div>
-                  <p className="font-semibold text-sm">@cliente_exemplo</p>
-                  <p className="text-xs text-gray-500">125.4K seguidores</p>
+                  <p className="font-semibold text-sm">{profileData.username}</p>
+                  <p className="text-xs text-gray-500">{profileData.followers} seguidores</p>
                 </div>
               </div>
             </div>
@@ -190,6 +276,14 @@ Gerado por Hubstack®`;
                   </button>
                 ))}
               </div>
+
+              <button
+                onClick={openManualDataModal}
+                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+              >
+                <Edit3 className="w-4 h-4" />
+                Dados Manuais
+              </button>
 
               <button
                 onClick={() => setShowShareModal(true)}
@@ -231,10 +325,10 @@ Gerado por Hubstack®`;
         {/* Métricas Principais */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: Heart, title: 'Curtidas', value: '18.2K', change: '+12.5%', color: 'blue' },
-            { icon: MessageCircle, title: 'Comentários', value: '2.4K', change: '+8.3%', color: 'indigo' },
-            { icon: Eye, title: 'Alcance', value: '125K', change: '+15.7%', color: 'cyan' },
-            { icon: Users, title: 'Engajamento', value: '4.2%', change: '+0.8%', color: 'green' }
+            { icon: Heart, title: 'Curtidas', value: mainMetrics.likes, change: mainMetrics.likesChange, color: 'blue' },
+            { icon: MessageCircle, title: 'Comentários', value: mainMetrics.comments, change: mainMetrics.commentsChange, color: 'indigo' },
+            { icon: Eye, title: 'Alcance', value: mainMetrics.reach, change: mainMetrics.reachChange, color: 'cyan' },
+            { icon: Users, title: 'Engajamento', value: mainMetrics.engagement, change: mainMetrics.engagementChange, color: 'green' }
           ].map((metric, index) => (
             <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
@@ -254,10 +348,10 @@ Gerado por Hubstack®`;
         {/* Performance */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: Users, title: 'Visitas ao Perfil', value: '3.2K', change: '+18%' },
-            { icon: Clock, title: 'Tempo Médio', value: '2m 45s', change: '+15s' },
-            { icon: Bookmark, title: 'Salvamentos', value: '1.2K', change: '+125' },
-            { icon: Share2, title: 'Links Externos', value: '456', change: '+89' }
+            { icon: Users, title: 'Visitas ao Perfil', value: performanceMetrics.profileVisits, change: performanceMetrics.profileVisitsChange },
+            { icon: Clock, title: 'Tempo Médio', value: performanceMetrics.averageTime, change: performanceMetrics.averageTimeChange },
+            { icon: Bookmark, title: 'Salvamentos', value: performanceMetrics.saves, change: performanceMetrics.savesChange },
+            { icon: Share2, title: 'Links Externos', value: performanceMetrics.externalLinks, change: performanceMetrics.externalLinksChange }
           ].map((metric, index) => (
             <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
@@ -281,7 +375,7 @@ Gerado por Hubstack®`;
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Alcance Semanal</h3>
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={weeklyData}>
+              <AreaChart data={chartData.weekly}>
                 <defs>
                   <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
@@ -308,7 +402,7 @@ Gerado por Hubstack®`;
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={ageData}
+                  data={chartData.ageData}
                   cx="50%"
                   cy="50%"
                   innerRadius={40}
@@ -316,14 +410,14 @@ Gerado por Hubstack®`;
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {ageData.map((entry, index) => (
+                  {chartData.ageData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="flex justify-center gap-4 mt-4">
-              {ageData.map((item, index) => (
+              {chartData.ageData.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                   <span className="text-sm text-gray-600">{item.name}</span>
@@ -338,13 +432,13 @@ Gerado por Hubstack®`;
             <div className="space-y-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">
-                  +{selectedPeriod === 7 ? '3.2' : selectedPeriod === 30 ? '12.5' : '28.7'}%
+                  {growthData.periodGrowth}
                 </div>
                 <div className="text-sm text-gray-600">Este período</div>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-indigo-600">
-                  +{selectedPeriod === 7 ? '0.8' : selectedPeriod === 30 ? '2.3' : '6.8'}K
+                  {growthData.newFollowers}
                 </div>
                 <div className="text-sm text-gray-600">Novos seguidores</div>
               </div>
@@ -358,13 +452,13 @@ Gerado por Hubstack®`;
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">💡 Insights</h3>
             <div className="space-y-3">
               <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-700">✨ Melhor formato: 3:4</p>
+                <p className="text-sm text-gray-700">✨ Melhor formato: {insightsData.bestFormat}</p>
               </div>
               <div className="p-3 bg-indigo-50 rounded-lg">
-                <p className="text-sm text-gray-700">🏷️ Hashtag top: #lifestyle</p>
+                <p className="text-sm text-gray-700">🏷️ Hashtag top: {insightsData.topHashtag}</p>
               </div>
               <div className="p-3 bg-cyan-50 rounded-lg">
-                <p className="text-sm text-gray-700">👥 Público: 25-34 anos</p>
+                <p className="text-sm text-gray-700">👥 Público: {insightsData.targetAudience}</p>
               </div>
             </div>
           </div>
@@ -372,10 +466,10 @@ Gerado por Hubstack®`;
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">📍 Localização</h3>
             <div className="space-y-3">
-              {['São Paulo, BR', 'Rio de Janeiro, BR', 'Belo Horizonte, BR'].map((city, index) => (
+              {locationData.map((location, index) => (
                 <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{city}</span>
-                  <span className="text-sm font-medium">{[85, 65, 45][index]}%</span>
+                  <span className="text-sm text-gray-600">{location.city}</span>
+                  <span className="text-sm font-medium">{location.percentage}%</span>
                 </div>
               ))}
             </div>
@@ -384,12 +478,7 @@ Gerado por Hubstack®`;
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">📱 Conteúdo</h3>
             <div className="space-y-3">
-              {[
-                { type: 'Posts', count: 45 },
-                { type: 'Stories', count: 128 },
-                { type: 'Reels', count: 23 },
-                { type: 'Videos', count: 12 }
-              ].map((item, index) => (
+              {contentData.map((item, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">{item.type}</span>
                   <span className="text-sm font-medium">{item.count}</span>
@@ -413,6 +502,115 @@ Gerado por Hubstack®`;
           </div>
         </div>
       </footer>
+
+      {/* Modal de Dados Manuais */}
+      {showManualModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Editar Dados Manuais</h2>
+              <button 
+                onClick={() => setShowManualModal(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-8">
+              {/* Dados do Perfil */}
+              <div>
+                <h3 className="text-lg font-medium mb-4">📱 Perfil</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Username</label>
+                    <input
+                      type="text"
+                      value={tempData.profileData?.username || ''}
+                      onChange={(e) => setTempData(prev => ({
+                        ...prev,
+                        profileData: { ...prev.profileData, username: e.target.value }
+                      }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Seguidores</label>
+                    <input
+                      type="text"
+                      value={tempData.profileData?.followers || ''}
+                      onChange={(e) => setTempData(prev => ({
+                        ...prev,
+                        profileData: { ...prev.profileData, followers: e.target.value }
+                      }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Insights */}
+              <div>
+                <h3 className="text-lg font-medium mb-4">💡 Insights</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Melhor Formato</label>
+                    <input
+                      type="text"
+                      value={tempData.insightsData?.bestFormat || ''}
+                      onChange={(e) => setTempData(prev => ({
+                        ...prev,
+                        insightsData: { ...prev.insightsData, bestFormat: e.target.value }
+                      }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Hashtag Top</label>
+                    <input
+                      type="text"
+                      value={tempData.insightsData?.topHashtag || ''}
+                      onChange={(e) => setTempData(prev => ({
+                        ...prev,
+                        insightsData: { ...prev.insightsData, topHashtag: e.target.value }
+                      }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Público Alvo</label>
+                    <input
+                      type="text"
+                      value={tempData.insightsData?.targetAudience || ''}
+                      onChange={(e) => setTempData(prev => ({
+                        ...prev,
+                        insightsData: { ...prev.insightsData, targetAudience: e.target.value }
+                      }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
+              <button
+                onClick={() => setShowManualModal(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveManualData}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Save className="w-4 h-4" />
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Compartilhamento */}
       {showShareModal && (
