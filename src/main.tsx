@@ -1,11 +1,10 @@
-// src/main.tsx
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx' // <- importante que seja o .tsx
-import './index.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css'; // <--- ESSENCIAL
+import App from './App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-)
+);
