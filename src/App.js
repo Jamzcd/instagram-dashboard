@@ -1,10 +1,9 @@
-import React from 'react';
-import InstagramDashboard from './components/InstagramDashboard';
+import HubstackDashboard from './components/HubstackDashboard';
 
 function App() {
   return (
-    <div className="App">
-      <InstagramDashboard />
+    <div className="min-h-screen">
+      <HubstackDashboard />
     </div>
   );
 }
