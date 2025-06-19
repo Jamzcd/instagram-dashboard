@@ -1,11 +1,11 @@
-import InstagramDashboard from './components/improved-instagram-dashboard'
+import HubstackDashboard from './components/HubstackDashboard';
 
 function App() {
   return (
     <div className="min-h-screen">
-      <InstagramDashboard />
+      <HubstackDashboard />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
