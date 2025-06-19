@@ -22,7 +22,8 @@ const HubstackDashboard = () => {
   // Estados para dados editáveis
   const [profileData, setProfileData] = useState({
     username: '@cliente_exemplo',
-    followers: '125.4K'
+    followers: '125.4K',
+    profileImage: null
   });
 
   const [mainMetrics, setMainMetrics] = useState({
@@ -123,34 +124,36 @@ const HubstackDashboard = () => {
     }
   };
 
+  const handleProfileImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setTempData(prev => ({
+          ...prev,
+          profileData: { ...prev.profileData, profileImage: e.target.result }
+        }));
+      };
+      reader.readAsDataURL(file);
+      showToast('Imagem carregada com sucesso!');
+    } else {
+      showToast('Selecione uma imagem válida', 'error');
+    }
+  };
+
   const openManualDataModal = () => {
     setTempData({
       profileData: { ...profileData },
-      mainMetrics: { ...mainMetrics },
-      performanceMetrics: { ...performanceMetrics },
-      growthData: { ...growthData },
-      insightsData: { ...insightsData },
-      locationData: [...locationData],
-      contentData: [...contentData],
-      chartData: {
-        weekly: [...chartData.weekly],
-        ageData: [...chartData.ageData]
-      }
+      insightsData: { ...insightsData }
     });
     setShowManualModal(true);
   };
 
   const saveManualData = () => {
     setProfileData(tempData.profileData);
-    setMainMetrics(tempData.mainMetrics);
-    setPerformanceMetrics(tempData.performanceMetrics);
-    setGrowthData(tempData.growthData);
     setInsightsData(tempData.insightsData);
-    setLocationData(tempData.locationData);
-    setContentData(tempData.contentData);
-    setChartData(tempData.chartData);
     setShowManualModal(false);
-    showToast('Dados atualizados com sucesso!');
+    showToast('Perfil atualizado com sucesso!');
   };
 
   const shareViaWhatsApp = () => {
@@ -185,48 +188,460 @@ Gerado por Hubstack®`;
   };
 
   const generatePDF = () => {
-    showToast('Gerando PDF...');
+    showToast('Gerando PDF do dashboard...');
     setTimeout(() => {
       const printWindow = window.open('', '_blank');
       printWindow.document.write(`
         <html>
           <head>
-            <title>Relatório Instagram</title>
+            <title>Dashboard Instagram - ${profileData.username}</title>
             <style>
-              body { font-family: Arial; padding: 20px; }
-              .header { text-align: center; border-bottom: 2px solid #3B82F6; padding-bottom: 20px; }
-              .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 30px 0; }
-              .metric { border: 1px solid #ddd; padding: 15px; text-align: center; border-radius: 8px; }
-              .metric-title { font-size: 12px; color: #666; margin-bottom: 10px; }
-              .metric-value { font-size: 24px; font-weight: bold; color: #1E40AF; }
+              @page { 
+                size: A4 landscape; 
+                margin: 15mm; 
+              }
+              * { 
+                box-sizing: border-box; 
+                margin: 0; 
+                padding: 0; 
+              }
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+                padding: 20px;
+                font-size: 12px;
+              }
+              .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              }
+              .header-left {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+              }
+              .logo {
+                width: 48px;
+                height: 48px;
+                background: linear-gradient(135deg, #2563eb, #4f46e5);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 20px;
+              }
+              .brand h1 {
+                font-size: 20px;
+                font-weight: bold;
+                color: #1f2937;
+              }
+              .brand p {
+                font-size: 12px;
+                color: #6b7280;
+              }
+              .profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              .profile-img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #60a5fa, #4f46e5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                overflow: hidden;
+              }
+              .profile-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              }
+              .header-right {
+                text-align: right;
+              }
+              .period {
+                background: #f3f4f6;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-weight: 500;
+                margin-bottom: 5px;
+              }
+              .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+              }
+              .metric-card {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                border: 1px solid #f3f4f6;
+              }
+              .metric-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 10px;
+              }
+              .metric-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .metric-icon.blue { background: #dbeafe; color: #2563eb; }
+              .metric-icon.indigo { background: #e0e7ff; color: #4f46e5; }
+              .metric-icon.cyan { background: #cffafe; color: #0891b2; }
+              .metric-icon.green { background: #dcfce7; color: #16a34a; }
+              .metric-title {
+                font-size: 10px;
+                color: #6b7280;
+                text-transform: uppercase;
+                font-weight: 500;
+                margin-bottom: 5px;
+              }
+              .metric-value {
+                font-size: 22px;
+                font-weight: bold;
+                color: #1f2937;
+                margin-bottom: 5px;
+              }
+              .metric-change {
+                font-size: 10px;
+                color: #16a34a;
+                font-weight: 500;
+              }
+              .performance-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+              }
+              .charts-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 20px;
+              }
+              .chart-card {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                border: 1px solid #f3f4f6;
+              }
+              .chart-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 15px;
+              }
+              .chart-placeholder {
+                height: 120px;
+                background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 500;
+                margin-bottom: 15px;
+              }
+              .age-legend {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+              }
+              .legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+              }
+              .legend-color {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+              }
+              .growth-stats {
+                text-align: center;
+                padding: 20px 0;
+              }
+              .growth-main {
+                font-size: 32px;
+                font-weight: bold;
+                color: #2563eb;
+                margin-bottom: 5px;
+              }
+              .growth-sub {
+                font-size: 18px;
+                font-weight: bold;
+                color: #4f46e5;
+                margin-bottom: 5px;
+              }
+              .growth-label {
+                font-size: 11px;
+                color: #6b7280;
+              }
+              .insights-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 20px;
+              }
+              .insight-card {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                border: 1px solid #f3f4f6;
+              }
+              .insight-item {
+                background: #f8fafc;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                font-size: 11px;
+                color: #374151;
+              }
+              .insight-item:last-child {
+                margin-bottom: 0;
+              }
+              .location-item, .content-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid #f3f4f6;
+                font-size: 11px;
+              }
+              .location-item:last-child, .content-item:last-child {
+                border-bottom: none;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #e5e7eb;
+                color: #6b7280;
+                font-size: 10px;
+              }
+              @media print {
+                body { 
+                  background: white !important; 
+                  padding: 10mm !important;
+                }
+                .header, .metric-card, .chart-card, .insight-card {
+                  box-shadow: none !important;
+                  border: 1px solid #e5e7eb !important;
+                }
+              }
             </style>
           </head>
           <body>
+            <!-- Header -->
             <div class="header">
-              <h1>Hubstack® - Relatório Instagram Analytics</h1>
-              <p>Período: ${selectedPeriod} dias • Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
+              <div class="header-left">
+                <div class="logo">H</div>
+                <div class="brand">
+                  <h1>Hubstack®</h1>
+                  <p>Relatório Instagram Analytics</p>
+                </div>
+                <div class="profile">
+                  <div class="profile-img">
+                    ${profileData.profileImage ? 
+                      `<img src="${profileData.profileImage}" alt="Profile">` : 
+                      `<span>${profileData.username.charAt(1)?.toUpperCase() || 'U'}</span>`
+                    }
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; font-size: 12px;">${profileData.username}</div>
+                    <div style="font-size: 10px; color: #6b7280;">${profileData.followers} seguidores</div>
+                  </div>
+                </div>
+              </div>
+              <div class="header-right">
+                <div class="period">${selectedPeriod} dias</div>
+                <div style="font-size: 10px; color: #6b7280;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
+              </div>
             </div>
-            <div class="metrics">
-              <div class="metric">
-                <div class="metric-title">CURTIDAS</div>
-                <div class="metric-value">${mainMetrics.likes}</div>
+
+            <!-- Métricas Principais -->
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon blue">❤️</div>
+                  <div>
+                    <div class="metric-title">Curtidas</div>
+                    <div class="metric-value">${mainMetrics.likes}</div>
+                    <div class="metric-change">${mainMetrics.likesChange}</div>
+                  </div>
+                </div>
               </div>
-              <div class="metric">
-                <div class="metric-title">COMENTÁRIOS</div>
-                <div class="metric-value">${mainMetrics.comments}</div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon indigo">💬</div>
+                  <div>
+                    <div class="metric-title">Comentários</div>
+                    <div class="metric-value">${mainMetrics.comments}</div>
+                    <div class="metric-change">${mainMetrics.commentsChange}</div>
+                  </div>
+                </div>
               </div>
-              <div class="metric">
-                <div class="metric-title">ALCANCE</div>
-                <div class="metric-value">${mainMetrics.reach}</div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon cyan">👁️</div>
+                  <div>
+                    <div class="metric-title">Alcance</div>
+                    <div class="metric-value">${mainMetrics.reach}</div>
+                    <div class="metric-change">${mainMetrics.reachChange}</div>
+                  </div>
+                </div>
               </div>
-              <div class="metric">
-                <div class="metric-title">ENGAJAMENTO</div>
-                <div class="metric-value">${mainMetrics.engagement}</div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon green">👥</div>
+                  <div>
+                    <div class="metric-title">Engajamento</div>
+                    <div class="metric-value">${mainMetrics.engagement}</div>
+                    <div class="metric-change">${mainMetrics.engagementChange}</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <p style="text-align: center; margin-top: 50px; color: #666;">
-              © 2025 Hubstack® • Todos os direitos reservados
-            </p>
+
+            <!-- Métricas de Performance -->
+            <div class="performance-grid">
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon blue">🔍</div>
+                  <div>
+                    <div class="metric-title">Visitas ao Perfil</div>
+                    <div class="metric-value">${performanceMetrics.profileVisits}</div>
+                    <div class="metric-change">${performanceMetrics.profileVisitsChange}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon blue">⏱️</div>
+                  <div>
+                    <div class="metric-title">Tempo Médio</div>
+                    <div class="metric-value">${performanceMetrics.averageTime}</div>
+                    <div class="metric-change">${performanceMetrics.averageTimeChange}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon blue">🔖</div>
+                  <div>
+                    <div class="metric-title">Salvamentos</div>
+                    <div class="metric-value">${performanceMetrics.saves}</div>
+                    <div class="metric-change">${performanceMetrics.savesChange}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-header">
+                  <div class="metric-icon blue">🔗</div>
+                  <div>
+                    <div class="metric-title">Links Externos</div>
+                    <div class="metric-value">${performanceMetrics.externalLinks}</div>
+                    <div class="metric-change">${performanceMetrics.externalLinksChange}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gráficos e Crescimento -->
+            <div class="charts-row">
+              <div class="chart-card">
+                <div class="chart-title">📈 Alcance Semanal</div>
+                <div class="chart-placeholder">Gráfico de Alcance</div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">👥 Faixa Etária</div>
+                <div class="chart-placeholder">Gráfico Pizza</div>
+                <div class="age-legend">
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #3B82F6;"></div>
+                    <span>18-24 (35%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #1E40AF;"></div>
+                    <span>25-34 (28%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #60A5FA;"></div>
+                    <span>35-44 (22%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: #1D4ED8;"></div>
+                    <span>45+ (15%)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">📊 Crescimento</div>
+                <div class="growth-stats">
+                  <div class="growth-main">${growthData.periodGrowth}</div>
+                  <div class="growth-label">Este período</div>
+                  <div class="growth-sub">${growthData.newFollowers}</div>
+                  <div class="growth-label">Novos seguidores</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Insights, Localização e Conteúdo -->
+            <div class="insights-row">
+              <div class="insight-card">
+                <div class="chart-title">💡 Insights</div>
+                <div class="insight-item">✨ Melhor formato: ${insightsData.bestFormat}</div>
+                <div class="insight-item">🏷️ Hashtag top: ${insightsData.topHashtag}</div>
+                <div class="insight-item">👥 Público: ${insightsData.targetAudience}</div>
+              </div>
+              <div class="insight-card">
+                <div class="chart-title">📍 Localização</div>
+                ${locationData.map(location => 
+                  `<div class="location-item">
+                    <span>${location.city}</span>
+                    <span>${location.percentage}%</span>
+                  </div>`
+                ).join('')}
+              </div>
+              <div class="insight-card">
+                <div class="chart-title">📱 Conteúdo</div>
+                ${contentData.map(content => 
+                  `<div class="content-item">
+                    <span>${content.type}</span>
+                    <span>${content.count}</span>
+                  </div>`
+                ).join('')}
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+              © 2025 Hubstack® • Todos os direitos reservados • Desenvolvido por Hubstack®
+            </div>
           </body>
         </html>
       `);
@@ -251,7 +666,21 @@ Gerado por Hubstack®`;
                 <p className="text-sm text-gray-600 dark:text-gray-400">Relatório Instagram Analytics</p>
               </div>
               <div className="flex items-center gap-3 ml-4">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                  {profileData.profileImage ? (
+                    <img 
+                      src={profileData.profileImage} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">
+                        {profileData.username.charAt(1)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <div>
                   <p className="font-semibold text-sm">{profileData.username}</p>
                   <p className="text-xs text-gray-500">{profileData.followers} seguidores</p>
@@ -282,7 +711,7 @@ Gerado por Hubstack®`;
                 className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
               >
                 <Edit3 className="w-4 h-4" />
-                Dados Manuais
+                Editar Perfil
               </button>
 
               <button
@@ -503,12 +932,12 @@ Gerado por Hubstack®`;
         </div>
       </footer>
 
-      {/* Modal de Dados Manuais */}
+      {/* Modal de Editar Perfil */}
       {showManualModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Editar Dados Manuais</h2>
+              <h2 className="text-xl font-semibold">Editar Perfil</h2>
               <button 
                 onClick={() => setShowManualModal(false)}
                 className="p-1 hover:bg-gray-100 rounded"
@@ -518,9 +947,55 @@ Gerado por Hubstack®`;
             </div>
             
             <div className="space-y-8">
+              {/* Foto do Perfil */}
+              <div>
+                <h3 className="text-lg font-medium mb-4">📸 Foto do Perfil</h3>
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    {tempData.profileData?.profileImage ? (
+                      <img 
+                        src={tempData.profileData.profileImage} 
+                        alt="Profile Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                        <span className="text-white text-lg font-bold">
+                          {tempData.profileData?.username?.charAt(1)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <label className="block border-2 border-dashed border-blue-300 p-4 rounded-lg text-center cursor-pointer hover:border-blue-500 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleProfileImageUpload} 
+                      />
+                      <Camera className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                      <p className="font-medium text-blue-600">Clique para alterar foto</p>
+                      <p className="text-sm text-gray-600 mt-1">PNG, JPG até 5MB</p>
+                    </label>
+                    {tempData.profileData?.profileImage && (
+                      <button
+                        onClick={() => setTempData(prev => ({
+                          ...prev,
+                          profileData: { ...prev.profileData, profileImage: null }
+                        }))}
+                        className="mt-2 text-sm text-red-600 hover:text-red-700"
+                      >
+                        Remover foto
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Dados do Perfil */}
               <div>
-                <h3 className="text-lg font-medium mb-4">📱 Perfil</h3>
+                <h3 className="text-lg font-medium mb-4">📱 Informações do Perfil</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Username</label>
@@ -531,7 +1006,8 @@ Gerado por Hubstack®`;
                         ...prev,
                         profileData: { ...prev.profileData, username: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="@seu_usuario"
                     />
                   </div>
                   <div>
@@ -543,7 +1019,8 @@ Gerado por Hubstack®`;
                         ...prev,
                         profileData: { ...prev.profileData, followers: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="125.4K"
                     />
                   </div>
                 </div>
@@ -562,7 +1039,8 @@ Gerado por Hubstack®`;
                         ...prev,
                         insightsData: { ...prev.insightsData, bestFormat: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="3:4"
                     />
                   </div>
                   <div>
@@ -574,7 +1052,8 @@ Gerado por Hubstack®`;
                         ...prev,
                         insightsData: { ...prev.insightsData, topHashtag: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="#lifestyle"
                     />
                   </div>
                   <div>
@@ -586,7 +1065,8 @@ Gerado por Hubstack®`;
                         ...prev,
                         insightsData: { ...prev.insightsData, targetAudience: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="25-34 anos"
                     />
                   </div>
                 </div>
