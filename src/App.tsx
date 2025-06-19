@@ -1,3 +1,4 @@
+// src/App.tsx
 import HubstackDashboard from './components/HubstackDashboard';
 
 function App() {
